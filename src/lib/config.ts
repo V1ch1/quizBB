@@ -8,7 +8,7 @@ export const ROUNDS = [
 export const POINTS_PER_ANSWER = 100;
 export const QUESTION_SECONDS = 15;
 export const EVENT = {
-  title: 'Convención Anual de Cosnor',
+  title: 'IV Convención Anual de Cosnor',
   date: '23 de octubre de 2026',
   dateTime: '2026-10-23',
   venue: 'Estadio de Riazor',

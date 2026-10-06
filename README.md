@@ -60,4 +60,27 @@ Marca y títulos: `src/lib/config.ts`. Estilos: `src/app/globals.css`. Logotipo 
 
 ## Antes de abrir al público
 
-Configurar la URL y la base definitivas; decidir si habrá premios y control individual de intentos; validar contenidos y preparar el QR de esa URL. Añadir un límite de creación de partidas en el alojamiento para campañas públicas de gran alcance. La versión local no tiene panel de administración ni control de identidad.
+Configurar la URL y la base definitivas; decidir si habrá premios y control individual de intentos; validar contenidos y preparar el QR de esa URL. Añadir un límite de creación de partidas en el alojamiento para campañas públicas de gran alcance. El quiz no tiene control de identidad.
+
+## Encuesta anónima y panel privado
+
+- `/encuesta`: 3 departamentos; 6 valoraciones obligatorias de 0 a 10 y un comentario opcional (máximo 2.000 caracteres) por departamento. Contenido del Word «ENCUESTA IIICCC (1).docx», actualizado a IV Convención Anual de Cosnor, 23 de octubre de 2026, Estadio de Riazor.
+- `/encuesta/acceso`: login de consulta. No hay registro público de cuentas ni enlace desde la encuesta.
+- `/encuesta/resultados`: medias por departamento y pregunta, distribución 0–10 y lista paginada de encuestas. `/encuesta/resultados/[id]` muestra sus 18 valoraciones y comentarios. Ambas rutas verifican la sesión en servidor antes de leer resultados. No se muestran horas de envío en el panel para reducir posibilidades de identificar respuestas por su momento de participación.
+- Las respuestas no guardan alias, correo, IP ni identificador del quiz. El navegador conserva un borrador en sessionStorage hasta el envío y un marcador posterior; los comentarios y notas se borran de ese borrador al enviar. Un token aleatorio evita duplicar un envío por reintento. Esto no impide que una persona participe en otra pestaña o navegador. Los registros técnicos del alojamiento son independientes de las respuestas.
+- Solo se guardan encuestas completas. Las medias incluyen ceros. Los comentarios se representan como texto escapado, nunca HTML.
+
+### Configurar el acceso
+
+Ejecutar `node scripts/setup-survey-admin.mjs` una sola vez. Genera una contraseña aleatoria para el usuario `cosnor`, una clave de sesión y un hash scrypt con salt; añade tres variables de servidor a `.env.local` y guarda las credenciales en `.data/survey-admin-access.txt`. Ambos archivos están ignorados por Git. El script se niega a sobrescribir credenciales existentes.
+
+Configurar `SURVEY_ADMIN_USER`, `SURVEY_ADMIN_PASSWORD_HASH` y `SURVEY_SESSION_SECRET` como secretos de producción en Vercel antes de desplegar; jamás usar prefijos `NEXT_PUBLIC_`. Sin esas tres variables, el panel permanece cerrado. Compartir el archivo de acceso solo con la persona autorizada. Esta primera versión tiene una cuenta de consulta; no incluye gestión de usuarios ni recuperación de contraseña por email.
+
+La sesión usa iron-session y cookie HttpOnly, SameSite=Lax, Secure en Vercel, caduca a las 8 horas y se comprueba contra una sesión revocable en la base. Cerrar sesión invalida incluso una copia de su cookie. Cambiar el usuario o hash de contraseña invalida sesiones previas; cambiar la clave de sesión invalida las cookies. Hay un límite persistente global de 30 intentos de login por ventana de 15 minutos para esta cuenta única, compartido entre instancias del servidor.
+
+### Validación y publicación
+
+`npm test` incluye validación de encuestas, ceros, agregados, persistencia, reintentos concurrentes, paginación, verificación de contraseña y límite de intentos. `scripts/verify-survey.mjs <CDP_URL>` verifica el flujo móvil y el acceso privado contra un servidor de producción local en puerto 3001. Arrancarlo con `QUIZ_SQLITE_PATH` apuntando a un archivo exclusivo en `.qa/`; nunca ejecutar este script contra producción. Los datos de prueba quedan solo en esa base aislada.
+
+Las tablas nuevas están declaradas en `src/lib/survey-store.ts` y se crean de forma aditiva, sin modificar las partidas. Antes de publicar, validar estas consultas en una rama de Neon del proyecto `square-term-61149537`. Validado sobre SQLite local, navegador móvil y PostgreSQL en la rama de pruebas br-sweet-frost-za67v3f4: esquema aditivo, envíos concurrentes sin duplicados, agregados y detalle individual. La fila de prueba se eliminó al terminar. Los secretos del panel se han configurado únicamente en producción en Vercel.
+

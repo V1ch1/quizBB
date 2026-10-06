@@ -35,7 +35,7 @@ async function initialize() {
   await resources.ready;
 }
 
-async function query(sql: string, values: (string | number)[] = []): Promise<Record<string, unknown>[]> {
+export async function query(sql: string, values: (string | number)[] = []): Promise<Record<string, unknown>[]> {
   await initialize();
   if (resources.pg) return (await resources.pg.query(sql, values)).rows;
   // Queries use parameters once in ascending order, compatible with both engines.

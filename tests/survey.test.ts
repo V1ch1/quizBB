@@ -1,0 +1,47 @@
+import { test } from 'node:test';
+import assert from 'node:assert/strict';
+import { mkdtempSync, mkdirSync } from 'node:fs';
+import { join } from 'node:path';
+import { randomUUID, scryptSync } from 'node:crypto';
+import { validateSurvey, summarizeSurvey } from '../src/lib/survey';
+import { verifyPassword } from '../src/lib/admin-password';
+const answers = { ratings: Array.from({ length: 3 }, () => [0, 2, 4, 6, 8, 10]), comments: ['Una mejora', '', 'Comentario'] };
+test('survey validates all 18 integer scores, preserving zero and optional comments', () => {
+  assert.deepEqual(validateSurvey(answers), answers);
+  for (const invalid of [null, {}, { ...answers, ratings: [] }, { ...answers, ratings: [[0]] }, { ...answers, comments: ['x'.repeat(2001), '', ''] }, ...[null, '5', -1, 11, 1.5, NaN].map(n => ({ ...answers, ratings: [Array(6).fill(n), ...answers.ratings.slice(1)] }))]) assert.throws(() => validateSurvey(invalid));
+  assert.equal(summarizeSurvey([]).departments[0], null);
+  const summary = summarizeSurvey([answers, answers]);
+  assert.equal(summary.total, 2); assert.equal(summary.departments[0], 5);
+  assert.equal(summary.questions[0][0].distribution[0], 2);
+});
+test('password verifier rejects wrong, malformed and oversized credentials', async () => {
+  const salt = 'a'.repeat(32);
+  const hash = `${salt}:${scryptSync('Test-only-password', salt, 64).toString('hex')}`;
+  assert.equal(await verifyPassword('Test-only-password', hash), true);
+  assert.equal(await verifyPassword('incorrect', hash), false);
+  assert.equal(await verifyPassword('x'.repeat(257), hash), false);
+  assert.equal(await verifyPassword('test', 'invalid'), false);
+});
+test('anonymous persistence: idempotent writes, private detail, aggregates, pagination and durable throttling', async () => {
+  mkdirSync('.qa', { recursive: true });
+  process.env.QUIZ_SQLITE_PATH = join(mkdtempSync(join('.qa', 'survey-test-')), 'survey.sqlite');
+  delete process.env.DATABASE_URL;
+  const { insertSurvey, surveyList, surveyDetail, surveySummary, allowLoginAttempt } = await import('../src/lib/survey-store');
+  const { query } = await import('../src/lib/store');
+  const token = randomUUID();
+  await Promise.all([insertSurvey(token, answers), insertSurvey(token, answers)]);
+  assert.equal((await surveySummary()).total, 1);
+  const list = await surveyList(1);
+  const detail = await surveyDetail(String(list[0].id));
+  assert.deepEqual(detail?.ratings, answers.ratings);
+  assert.deepEqual(detail?.comments, answers.comments);
+  assert.equal(await surveyDetail(randomUUID()), null);
+  const row = (await query('SELECT * FROM survey_responses'))[0];
+  assert.ok(!JSON.stringify(row).includes(token));
+  assert.ok(!('alias' in row) && !('ip' in row) && !('email' in row));
+  for (let i = 0; i < 21; i++) await insertSurvey(randomUUID(), answers);
+  assert.equal((await surveyList(1)).length, 20); assert.equal((await surveyList(2)).length, 2);
+  for (let i = 0; i < 30; i++) assert.equal(await allowLoginAttempt(900001), true);
+  assert.equal(await allowLoginAttempt(900001), false);
+  assert.equal(await allowLoginAttempt(1800001), true);
+});
