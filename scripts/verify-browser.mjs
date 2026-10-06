@@ -36,7 +36,13 @@ try {
   await page.keyboard.press('Escape');
   await expect(page.getByRole('dialog')).not.toBeVisible();
   await page.getByRole('button', { name: 'Clasificación', exact: true }).click();
-  await expect(page.getByText('El primer puesto está esperando.')).toBeVisible();
+  const initialRanking = await (await context.request.get(`${baseURL}/api/leaderboard`)).json();
+  if (initialRanking.total === 0) {
+    await expect(page.getByText('El primer puesto está esperando.')).toBeVisible();
+  } else {
+    await expect(page.getByRole('table', { name: 'Clasificación general del reto Cosnor' })).toBeVisible();
+    await page.getByRole('button', { name: 'Volver al inicio', exact: true }).click();
+  }
   await page.getByRole('button', { name: 'Acepto el reto', exact: true }).click();
   await page.getByLabel('Tu alias', { exact: true }).fill('QA Móvil');
   await page.getByRole('button', { name: 'Entrar al campo' }).click();

@@ -4,8 +4,9 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import Image from 'next/image';
 import { AnimatePresence, motion, MotionConfig } from 'motion/react';
 import { ArrowRight, ArrowLeft, Trophy, ArrowUpRight, X, Check, ShieldCheck, Flag, House, CircleHelp, Users, LoaderCircle, RotateCw, ChevronRight, Sparkles, CheckCircle2, Circle, Target, Medal } from 'lucide-react';
-import { nextStep, startGame, submitAnswer } from '@/app/actions';
-import { BRAND, ROUNDS } from '@/lib/config';
+import { nextStep, startGame, submitAnswer, expireQuestion } from '@/app/actions';
+import { BRAND, ROUNDS, EVENT } from '@/lib/config';
+import { useQuestionClock } from './use-question-clock';
 import type { ActionResult, GameView, Ranking } from '@/lib/types';
 
 type Screen = 'home' | 'alias' | 'game' | 'ranking';
@@ -69,16 +70,22 @@ export default function Quiz() {
     window.scrollTo({ top: 0, behavior: 'instant' });
   }, [screen, game?.revision]);
 
-  async function run(action: () => Promise<ActionResult>) {
+  const run = useCallback(async (action: () => Promise<ActionResult>, navigate = true) => {
     if (busyRef.current) return;
     busyRef.current = true; setBusy(true); setError('');
     try {
       const result = await action();
       if (!result.ok) { setError(result.error); return; }
-      setGame(result.game); setScreen('game');
+      setGame(result.game);
+      if (navigate) setScreen('game');
     } catch { setError('No hay conexión. Vuelve a intentarlo para guardar tu respuesta.'); }
     finally { busyRef.current = false; setBusy(false); }
-  }
+  }, []);
+  const onExpire = useCallback(() => {
+    if (game?.stage === 'question') void run(() => expireQuestion(game.revision), false);
+  }, [game, run]);
+  const remaining = useQuestionClock(game, onExpire);
+  const timeExpired = game?.stage === 'question' && remaining === 0;
   function go(screen: Screen) { if (!busy) setScreen(screen); }
   const activeRound = ROUNDS[(game?.round ?? 1) - 1];
   const inGame = screen === 'game' && game && game.stage !== 'result';
@@ -97,6 +104,10 @@ export default function Quiz() {
           <button className="help-button" onClick={() => rules.current?.showModal()} aria-label="Cómo se juega"><CircleHelp size={21}/></button>
         </nav>
       </header>
+      <section className="event-banner" aria-label="Datos de la convención">
+        <strong>{EVENT.title}</strong>
+        <span><time dateTime={EVENT.dateTime}>{EVENT.date}</time><span className="event-separator" aria-hidden="true">·</span>{EVENT.venue}</span>
+      </section>
 
       <main id="main" className={screen === 'home' ? 'home-main' : 'play-main'}>
         <AnimatePresence mode="wait" initial={false}>
@@ -106,13 +117,13 @@ export default function Quiz() {
                 <div className="edition"><span className="live-dot"/> COSNOR × DÉPOR <span className="edition-rule"/> UN RETO MUY NUESTRO</div>
                 <h1>Aquí se juega<br/>con <span className="history-word">historia<svg viewBox="0 0 420 22" preserveAspectRatio="none" aria-hidden="true"><path d="M4 14C105 1 270 3 412 12M60 20C172 9 290 10 373 15"/></svg></span><span className="plum-dot">.</span></h1>
                 <p className="hero-description">Lo que nos une, lo que nos protege y lo que nos hace vibrar. ¿Cuánto sabes de Cosnor y del Dépor?</p>
-                <div className="hero-facts"><span><CircleHelp size={17}/><b>24</b> preguntas</span><i/><span><Flag size={17}/><b>4</b> rondas</span><i/><span>A tu ritmo</span></div>
+                <div className="hero-facts"><span><CircleHelp size={17}/><b>24</b> preguntas</span><i/><span><Flag size={17}/><b>4</b> rondas</span><i/><span><b>15 s</b> por pregunta</span></div>
                 <button className="button primary hero-cta" disabled={!ready} onClick={() => go(game ? 'game' : 'alias')}>{!ready ? <><LoaderCircle className="spin" size={18}/>Preparando el reto</> : <>{game ? game.stage === 'result' ? 'Ver mi resultado' : 'Continuar mi partida' : 'Acepto el reto'}<ArrowRight size={21}/></>}</button>
                 {sessionError && <div className="error-message" role="alert">{sessionError}<button onClick={() => void loadSession()} className="text-button">Reintentar</button></div>}
                 <p className="cta-caption"><ShieldCheck size={14}/>Solo necesitas un alias y ganas de jugar.</p>
               </div>
               <div className="hero-art" aria-hidden="true">
-                <div className="art-topline"><span>EL RETO COSNOR</span><span>EDICIÓN BLANQUIAZUL ↗</span></div>
+                <div className="art-topline"><span>EL RETO COSNOR</span><span>23 OCTUBRE 2026 ↗</span></div>
                 <div className="pitch"><div className="pitch-outline"><div className="half-line"/><div className="center-circle"/><div className="goal top"/><div className="goal bottom"/></div></div>
                 <div className="art-ring ring-one"/><div className="art-ring ring-two"/>
                 <div className="floating-label"><span className="tiny-star">✳</span> Lo nuestro tiene historia.</div>
@@ -133,7 +144,7 @@ export default function Quiz() {
               <form onSubmit={event => { event.preventDefault(); void run(() => startGame(alias)); }}>
                 <label htmlFor="alias">Tu alias</label><input id="alias" name="alias" placeholder="Ej. Coruñés90" value={alias} onChange={e => setAlias(e.target.value)} minLength={2} maxLength={20} required autoComplete="nickname" disabled={busy} aria-describedby="alias-hint"/>
                 <small id="alias-hint">Entre 2 y 20 caracteres. Tu alias será público.</small>
-                <div className="mini-rules"><span><Check size={16}/>100 puntos por acierto</span><span><Check size={16}/>Sin penalización por fallar</span><span><Check size={16}/>Sin cuenta atrás</span></div>
+                <div className="mini-rules"><span><Check size={16}/>100 puntos por acierto</span><span><Check size={16}/>Sin penalización por fallar</span><span><Check size={16}/>15 segundos para confirmar cada respuesta</span></div>
                 {error && <p className="error-message" role="alert">{error}</p>}
                 <button className="button primary full-width" type="submit" disabled={busy || alias.trim().length < 2}>{busy ? <LoaderCircle className="spin" size={19}/> : <>Entrar al campo<ArrowRight size={20}/></>}</button>
               </form><p className="small-note">Guardamos tu partida en este navegador para que puedas continuar si sales.</p>
@@ -146,17 +157,17 @@ export default function Quiz() {
               <div className="game-progress-label"><span>RONDA 0{game.round} / 04</span><span>{game.index + (game.stage === 'feedback' ? 1 : 0)} de {game.total} respondidas</span></div><div className="progress-track" role="progressbar" aria-label="Preguntas respondidas" aria-valuenow={game.index + (game.stage === 'feedback' ? 1 : 0)} aria-valuemin={0} aria-valuemax={game.total}><motion.div animate={{ width: `${(game.index + (game.stage === 'feedback' ? 1 : 0)) / game.total * 100}%` }} transition={{ duration: .4 }}/></div>
               <AnimatePresence mode="wait" initial={false}>
                 {game.stage === 'intro' ? <motion.div className="round-intro" key={`intro-${game.round}`} initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }}><div className="intro-art"><span className="intro-number">0{game.round}</span><span className="intro-icon"><RoundIcon round={game.round} size={65}/></span><span className="intro-star">✳</span></div><span className="eyebrow">{activeRound.label}</span><h1 ref={focusHeading} tabIndex={-1}>{activeRound.title}</h1><p>{activeRound.description}</p><div className="intro-stats"><span>6 preguntas</span><Circle size={4} fill="currentColor"/><span>600 puntos en juego</span></div>{error && <p className="error-message" role="alert">{error}</p>}<button className="button primary" disabled={busy} onClick={() => void run(() => nextStep(game.revision))}>{busy ? <LoaderCircle className="spin" size={19}/> : <>Empezar ronda {game.round}<ArrowRight size={20}/></>}</button></motion.div> : <motion.div className="question-card" key={`question-${game.index}`} initial={{ opacity: 0, x: 16 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -16 }} transition={{ duration: .2 }}>
-                  <div className="question-meta"><span className="question-tag"><RoundIcon round={game.round} size={15}/>{activeRound.title}</span><span className="question-value">+100 pts</span></div><p className="eyebrow question-number">PREGUNTA {String(game.index + 1).padStart(2, '0')} <span>/ {game.total}</span></p><h1 ref={focusHeading} tabIndex={-1}>{game.question?.text}</h1>
+                  <div className="question-meta"><span className="question-tag"><RoundIcon round={game.round} size={15}/>{activeRound.title}</span><span className="question-tools"><span className="question-value">+100 pts</span><span className={`question-timer${remaining <= 5 && !game.feedback ? " urgent" : ""}`} role="timer" aria-label="Tiempo restante" aria-live="off"><span aria-hidden="true">◷</span><b>{game.feedback ? "—" : String(remaining).padStart(2, "0")}</b><span>{game.feedback ? "fin" : "s"}</span></span></span></div><p className="eyebrow question-number">PREGUNTA {String(game.index + 1).padStart(2, '0')} <span>/ {game.total}</span></p><h1 ref={focusHeading} tabIndex={-1}>{game.question?.text}</h1>
                   <div className="answers" role="group" aria-label="Opciones de respuesta">{game.question?.options.map((option, index) => {
                     const feedback = game.feedback;
                     const correct = feedback?.correct === option.id;
                     const wrong = !!feedback && feedback.selected === option.id && !correct;
                     const chosen = selected === option.id;
-                    return <button key={option.id} className={`answer ${chosen && !feedback ? 'selected' : ''} ${correct ? 'correct' : ''} ${wrong ? 'wrong' : ''}`} disabled={busy || !!feedback} aria-pressed={feedback ? feedback.selected === option.id : chosen} onClick={() => setSelected(option.id)}><span className="answer-letter">{String.fromCharCode(65 + index)}</span><span>{option.text}</span>{correct ? <CheckCircle2 size={22}/> : wrong ? <X size={22}/> : <span className="answer-radio">{chosen && <span/>}</span>}{correct && <span className="sr-only">Respuesta correcta</span>}{wrong && <span className="sr-only">Tu respuesta, incorrecta</span>}</button>;
+                    return <button key={option.id} className={`answer ${chosen && !feedback ? 'selected' : ''} ${correct ? 'correct' : ''} ${wrong ? 'wrong' : ''}`} disabled={busy || !!feedback || timeExpired} aria-pressed={feedback ? feedback.selected === option.id : chosen} onClick={() => setSelected(option.id)}><span className="answer-letter">{String.fromCharCode(65 + index)}</span><span>{option.text}</span>{correct ? <CheckCircle2 size={22}/> : wrong ? <X size={22}/> : <span className="answer-radio">{chosen && <span/>}</span>}{correct && <span className="sr-only">Respuesta correcta</span>}{wrong && <span className="sr-only">Tu respuesta, incorrecta</span>}</button>;
                   })}</div>
-                  {game.feedback && <motion.div className={`feedback ${game.feedback.isCorrect ? 'success' : 'miss'}`} initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} role="status"><span className="feedback-icon">{game.feedback.isCorrect ? <Check size={23}/> : <Target size={23}/>}</span><div><strong>{game.feedback.isCorrect ? '¡Esa era! 100 puntos más.' : 'Esta se nos ha escapado.'}</strong><p>{game.feedback.isCorrect ? 'Seguimos sumando historia.' : 'La respuesta correcta está marcada en verde. ¡Seguimos!'}</p></div></motion.div>}
+                  {game.feedback && <motion.div className={`feedback ${game.feedback.isCorrect ? 'success' : 'miss'}`} initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} role="status"><span className="feedback-icon">{game.feedback.isCorrect ? <Check size={23}/> : <Target size={23}/>}</span><div><strong>{game.feedback.timedOut ? '¡Tiempo agotado!' : game.feedback.isCorrect ? '¡Esa era! 100 puntos más.' : 'Esta se nos ha escapado.'}</strong><p>{game.feedback.timedOut ? 'No has confirmado a tiempo. Esta pregunta suma 0 puntos. La correcta está en verde.' : game.feedback.isCorrect ? 'Seguimos sumando historia.' : 'La respuesta correcta está marcada en verde. ¡Seguimos!'}</p></div></motion.div>}
                   {error && <p className="error-message" role="alert">{error}</p>}
-                  <div className="question-actions"><span>{game.feedback ? `${game.correctCount} ${game.correctCount === 1 ? 'acierto' : 'aciertos'} hasta ahora` : 'Elige una respuesta y confírmala.'}</span><button className="button primary" disabled={busy || (!game.feedback && !selected)} onClick={() => game.feedback ? void run(() => nextStep(game.revision)) : selected && game.question && void run(() => submitAnswer(game.revision, game.question!.id, selected))}>{busy ? <LoaderCircle className="spin" size={18}/> : <>{game.feedback ? game.index === game.total - 1 ? 'Ver mi resultado' : (game.index + 1) % 6 === 0 ? 'Siguiente ronda' : 'Siguiente pregunta' : 'Confirmar respuesta'}<ArrowRight size={19}/></>}</button></div>
+                  <div className="question-actions"><span>{game.feedback ? `${game.correctCount} ${game.correctCount === 1 ? 'acierto' : 'aciertos'} hasta ahora` : timeExpired ? 'Tiempo agotado. Guardando el resultado…' : 'Confirma antes de que termine el tiempo.'}</span><button className="button primary" disabled={busy || timeExpired || (!game.feedback && !selected)} onClick={() => game.feedback ? void run(() => nextStep(game.revision)) : selected && game.question && void run(() => submitAnswer(game.revision, game.question!.id, selected))}>{busy ? <LoaderCircle className="spin" size={18}/> : <>{game.feedback ? game.index === game.total - 1 ? 'Ver mi resultado' : (game.index + 1) % 6 === 0 ? 'Siguiente ronda' : 'Siguiente pregunta' : 'Confirmar respuesta'}<ArrowRight size={19}/></>}</button></div>
                 </motion.div>}
               </AnimatePresence>
             </div>
@@ -177,7 +188,7 @@ export default function Quiz() {
           <a href="https://www.blancoyenbatea.com" target="_blank" rel="noopener noreferrer">www.blancoyenbatea.com<span className="sr-only"> (se abre en una pestaña nueva)</span><ArrowUpRight size={13} aria-hidden="true"/></a>
         </p>
       </footer>
-      <dialog ref={rules} className="rules-dialog" onClick={event => { if (event.target === event.currentTarget) rules.current?.close(); }} aria-labelledby="rules-title"><div className="rules-content"><button className="close-dialog" aria-label="Cerrar reglas" onClick={() => rules.current?.close()}><X size={22}/></button><span className="large-icon"><Flag size={27}/></span><p className="eyebrow">LAS REGLAS DEL JUEGO</p><h2 id="rules-title">Un reto. Cero complicaciones.</h2><ol className="rules-list"><li><span>01</span><div><strong>Elige tu alias</strong><p>Será el nombre público que aparecerá en el marcador.</p></div></li><li><span>02</span><div><strong>Juega las cuatro rondas</strong><p>24 preguntas, cuatro opciones y una respuesta correcta. Sin límite de tiempo.</p></div></li><li><span>03</span><div><strong>Suma puntos</strong><p>100 por acierto. Fallar no resta. Confirma tu respuesta para pasar a la siguiente.</p></div></li><li><span>04</span><div><strong>Encuentra tu puesto</strong><p>Al terminar guardamos tu resultado. Los empates comparten posición.</p></div></li></ol><p className="small-note">Este navegador conserva una partida durante 30 días. El alias no verifica la identidad del participante.</p><button className="button primary full-width" onClick={() => rules.current?.close()}>¡Entendido!<Check size={18}/></button></div></dialog>
+      <dialog ref={rules} className="rules-dialog" onClick={event => { if (event.target === event.currentTarget) rules.current?.close(); }} aria-labelledby="rules-title"><div className="rules-content"><button className="close-dialog" aria-label="Cerrar reglas" onClick={() => rules.current?.close()}><X size={22}/></button><span className="large-icon"><Flag size={27}/></span><p className="eyebrow">LAS REGLAS DEL JUEGO</p><h2 id="rules-title">Un reto. Cero complicaciones.</h2><ol className="rules-list"><li><span>01</span><div><strong>Elige tu alias</strong><p>Será el nombre público que aparecerá en el marcador.</p></div></li><li><span>02</span><div><strong>Juega las cuatro rondas</strong><p>24 preguntas, cuatro opciones y una respuesta correcta. Tienes 15 segundos por pregunta; el contador empieza cuando se abre.</p></div></li><li><span>03</span><div><strong>Suma puntos</strong><p>100 por acierto. Fallar no resta. Debes confirmar antes de que se agoten los 15 segundos; si no, sumas 0 puntos. Recargar o salir no pausa el contador.</p></div></li><li><span>04</span><div><strong>Encuentra tu puesto</strong><p>Al terminar guardamos tu resultado. Los empates comparten posición.</p></div></li></ol><p className="small-note">Este navegador conserva una partida durante 30 días. El alias no verifica la identidad del participante.</p><button className="button primary full-width" onClick={() => rules.current?.close()}>¡Entendido!<Check size={18}/></button></div></dialog>
     </div>
   </MotionConfig>;
 }

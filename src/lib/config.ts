@@ -6,3 +6,10 @@ export const ROUNDS = [
   { number: 4, title: 'Prórroga Cosnor × Dépor', short: 'El desafío final', description: 'Nuestra historia y nuestra afición se encuentran. Seis preguntas para darlo todo.', icon: 'flag', label: 'Hasta el último minuto' },
 ] as const;
 export const POINTS_PER_ANSWER = 100;
+export const QUESTION_SECONDS = 15;
+export const EVENT = {
+  title: 'Convención Anual de Cosnor',
+  date: '23 de octubre de 2026',
+  dateTime: '2026-10-23',
+  venue: 'Estadio de Riazor',
+};

@@ -1,6 +1,6 @@
 'use server';
 import { cookies } from 'next/headers';
-import { advanceGame, answerGame, createGame, gameView } from '@/lib/game';
+import { advanceGame, answerGame, createGame, expireGame, gameView } from '@/lib/game';
 import { currentGame, COOKIE } from '@/lib/session';
 import { insertGame, readGame, saveGame } from '@/lib/store';
 import type { ActionResult, StoredGame } from '@/lib/types';
@@ -32,6 +32,7 @@ async function change(revision: number, transform: (game: StoredGame) => StoredG
     try { next = transform(current); } catch (error) {
       return { ok: false, error: error instanceof Error ? error.message : 'Respuesta no válida.' };
     }
+    if (next === current) return { ok: true, game: gameView(current) };
     if (!await saveGame(next, current.revision)) {
       const latest = await readGame(current.id);
       if (!latest) throw new Error('Session disappeared');
@@ -47,3 +48,4 @@ export async function submitAnswer(revision: number, questionId: number, optionI
   return change(revision, game => answerGame(game, questionId, optionId));
 }
 export async function nextStep(revision: number) { return change(revision, advanceGame); }
+export async function expireQuestion(revision: number) { return change(revision, expireGame); }

@@ -22,7 +22,9 @@ npm start
 
 Verificación realizada: seis pruebas automáticas de contenido, puntuación, alias, concurrencia y empates; recorrido completo en navegador alternando 320, 360, 375, 390 y 430 px, horizontal 844 × 390, tableta 768 × 1024 y escritorio a 1440 px. Comprobados los controles táctiles de al menos 44 px, ausencia de desbordamiento horizontal, crédito del equipo de desarrollo, pérdida de conexión, recarga a mitad de partida y clasificación desde una segunda sesión. Son pruebas con tamaños y entrada táctil emulados, no con dispositivos físicos. La conexión PostgreSQL queda pendiente de configurar y probar con la base de producción.
 
-Para repetir el recorrido visual: abrir una sesión aislada con `npx agent-browser --session cosnor-qa open http://localhost:3000`, obtener su endpoint con `npx agent-browser --session cosnor-qa get cdp-url` y ejecutar `node scripts/verify-browser.mjs <endpoint>`. Esta prueba asume una clasificación local vacía; guarda capturas en `.qa/` y elimina únicamente su propia partida al finalizar.
+Para repetir el recorrido visual: abrir una sesión aislada con `npx agent-browser --session cosnor-qa open http://localhost:3000`, obtener su endpoint con `npx agent-browser --session cosnor-qa get cdp-url` y ejecutar `node scripts/verify-browser.mjs <endpoint>`. Conserva los participantes existentes; guarda capturas en `.qa/` y elimina únicamente su propia partida al finalizar.
+
+Para verificar el cronómetro: `node scripts/verify-timer.mjs <endpoint>`. Comprueba los 15 segundos reales, la caducidad sin confirmar, la recuperación tras recarga, la reconexión y un reloj del participante adelantado una hora. Ejecutar solo contra la instancia local; elimina exclusivamente su propia sesión de prueba. Las diez pruebas de `npm test` incluyen el límite exacto del plazo y las sesiones anteriores a la introducción del contador.
 
 ## Datos y publicación
 
@@ -35,7 +37,10 @@ Para repetir el recorrido visual: abrir una sesión aislada con `npx agent-brows
 
 ## Reglas
 
-- 100 puntos por acierto, 0 por error, máximo 2.400. Sin cronómetro ni desempate por velocidad.
+- Convención Anual de Cosnor: 23 de octubre de 2026, Estadio de Riazor.
+- 100 puntos por acierto, 0 por error, máximo 2.400. Cada pregunta tiene 15 segundos para confirmar la respuesta. No hay desempate por velocidad.
+- El plazo se guarda en el servidor cuando se abre cada pregunta. Recargar, cambiar de pestaña o perder la conexión no lo reinicia. Una respuesta recibida en el límite o después suma cero; se muestra la solución y se permite continuar. Seleccionar sin confirmar también suma cero al agotarse el plazo.
+- Las pantallas de introducción de ronda y de corrección no consumen tiempo de la siguiente pregunta. Las partidas antiguas sin plazo reciben uno al recuperarse; los resultados ya completados se conservan.
 - Las cuatro rondas y las preguntas mantienen su orden. Las opciones se barajan por partida y reciben identificadores aleatorios.
 - Se confirma cada respuesta; no se puede cambiar después. Las peticiones repetidas no duplican puntuación. Actualizaciones concurrentes utilizan control de revisión en la base de datos.
 - La clasificación muestra hasta 50 resultados, además de la posición propia si queda fuera. Iguales puntos comparten puesto. Se actualiza cada 15 segundos mientras está visible.

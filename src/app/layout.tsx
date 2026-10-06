@@ -10,8 +10,8 @@ export const viewport: Viewport = {
   themeColor: '#faf9f6',
 };
 export const metadata: Metadata = {
-  title: 'El reto Cosnor · Aquí se juega con historia',
-  description: '24 preguntas, 4 rondas y una pasión compartida. Juega al reto Cosnor y descubre cuánto sabes de Cosnor y el Dépor.',
+  title: 'El reto Cosnor · Convención Anual 2026 · Riazor',
+  description: 'Convención Anual de Cosnor · 23 de octubre de 2026 · Estadio de Riazor. 24 preguntas, 4 rondas y 15 segundos por pregunta.',
   robots: { index: false, follow: false },
 };
 export default function RootLayout({ children }: { children: React.ReactNode }) {
