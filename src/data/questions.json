@@ -1,0 +1,578 @@
+[
+  {
+    "id": 1,
+    "round": 1,
+    "text": "¿En qué año nació Cosnor?",
+    "options": [
+      {
+        "id": "A",
+        "text": "1986"
+      },
+      {
+        "id": "B",
+        "text": "1990"
+      },
+      {
+        "id": "C",
+        "text": "1998"
+      },
+      {
+        "id": "D",
+        "text": "2004"
+      }
+    ],
+    "correct": "B"
+  },
+  {
+    "id": 2,
+    "round": 1,
+    "text": "¿Cuál es el lema de Cosnor?",
+    "options": [
+      {
+        "id": "A",
+        "text": "Personas a tu servicio"
+      },
+      {
+        "id": "B",
+        "text": "«Seguros sin letra pequeña»"
+      },
+      {
+        "id": "C",
+        "text": "«Siempre en tu equipo»"
+      },
+      {
+        "id": "D",
+        "text": "«Protegemos lo que quieres»"
+      }
+    ],
+    "correct": "A"
+  },
+  {
+    "id": 3,
+    "round": 1,
+    "text": "¿En cuál de estas localidades NO hay oficina de Cosnor?",
+    "options": [
+      {
+        "id": "A",
+        "text": "Xove"
+      },
+      {
+        "id": "B",
+        "text": "Arteixo"
+      },
+      {
+        "id": "C",
+        "text": "Betanzos"
+      },
+      {
+        "id": "D",
+        "text": "Ferrol"
+      }
+    ],
+    "correct": "D"
+  },
+  {
+    "id": 4,
+    "round": 1,
+    "text": "¿En qué localidad tiene Cosnor dos oficinas?",
+    "options": [
+      {
+        "id": "A",
+        "text": "Arteixo"
+      },
+      {
+        "id": "B",
+        "text": "Betanzos"
+      },
+      {
+        "id": "C",
+        "text": "Xove"
+      },
+      {
+        "id": "D",
+        "text": "A Coruña"
+      }
+    ],
+    "correct": "B"
+  },
+  {
+    "id": 5,
+    "round": 1,
+    "text": "¿Cuál de estos seguros existe de verdad en el catálogo de Cosnor?",
+    "options": [
+      {
+        "id": "A",
+        "text": "Seguro de bigote"
+      },
+      {
+        "id": "B",
+        "text": "Seguro de instrumentos musicales"
+      },
+      {
+        "id": "C",
+        "text": "Seguro contra el viento de Riazor"
+      },
+      {
+        "id": "D",
+        "text": "Seguro de suegra"
+      }
+    ],
+    "correct": "B"
+  },
+  {
+    "id": 6,
+    "round": 1,
+    "text": "¿A qué red internacional de corredurías pertenece Cosnor?",
+    "options": [
+      {
+        "id": "A",
+        "text": "Lloyd's Club"
+      },
+      {
+        "id": "B",
+        "text": "WTW Networks"
+      },
+      {
+        "id": "C",
+        "text": "Global Brokers League"
+      },
+      {
+        "id": "D",
+        "text": "Atlantic Insurance Group"
+      }
+    ],
+    "correct": "B"
+  },
+  {
+    "id": 7,
+    "round": 2,
+    "text": "¿En qué año se fundó el Deportivo?",
+    "options": [
+      {
+        "id": "A",
+        "text": "1906"
+      },
+      {
+        "id": "B",
+        "text": "1912"
+      },
+      {
+        "id": "C",
+        "text": "1920"
+      },
+      {
+        "id": "D",
+        "text": "1944"
+      }
+    ],
+    "correct": "A"
+  },
+  {
+    "id": 8,
+    "round": 2,
+    "text": "Riazor se inauguró en 1944. ¿Contra qué equipo?",
+    "options": [
+      {
+        "id": "A",
+        "text": "Celta"
+      },
+      {
+        "id": "B",
+        "text": "Real Madrid"
+      },
+      {
+        "id": "C",
+        "text": "Valencia"
+      },
+      {
+        "id": "D",
+        "text": "Sporting"
+      }
+    ],
+    "correct": "C"
+  },
+  {
+    "id": 9,
+    "round": 2,
+    "text": "¿Cuántos espectadores caben en Riazor?",
+    "options": [
+      {
+        "id": "A",
+        "text": "22.500"
+      },
+      {
+        "id": "B",
+        "text": "32.490"
+      },
+      {
+        "id": "C",
+        "text": "45.000"
+      },
+      {
+        "id": "D",
+        "text": "55.000"
+      }
+    ],
+    "correct": "B"
+  },
+  {
+    "id": 10,
+    "round": 2,
+    "text": "El «Centenariazo» de 2002, ¿en qué estadio se jugó?",
+    "options": [
+      {
+        "id": "A",
+        "text": "Riazor"
+      },
+      {
+        "id": "B",
+        "text": "La Cartuja"
+      },
+      {
+        "id": "C",
+        "text": "Santiago Bernabéu"
+      },
+      {
+        "id": "D",
+        "text": "Mestalla"
+      }
+    ],
+    "correct": "C"
+  },
+  {
+    "id": 11,
+    "round": 2,
+    "text": "En 2004 el Dépor remontó con un 4-0 en Riazor a...",
+    "options": [
+      {
+        "id": "A",
+        "text": "Juventus"
+      },
+      {
+        "id": "B",
+        "text": "AC Milan"
+      },
+      {
+        "id": "C",
+        "text": "Bayern"
+      },
+      {
+        "id": "D",
+        "text": "Manchester United"
+      }
+    ],
+    "correct": "B"
+  },
+  {
+    "id": 12,
+    "round": 2,
+    "text": "¿Cuántas temporadas estuvo el Dépor fuera de Primera antes de volver en mayo de 2026?",
+    "options": [
+      {
+        "id": "A",
+        "text": "4"
+      },
+      {
+        "id": "B",
+        "text": "6"
+      },
+      {
+        "id": "C",
+        "text": "8"
+      },
+      {
+        "id": "D",
+        "text": "10"
+      }
+    ],
+    "correct": "C"
+  },
+  {
+    "id": 13,
+    "round": 3,
+    "text": "En un seguro, ¿qué es la franquicia?",
+    "options": [
+      {
+        "id": "A",
+        "text": "Una tienda de seguros"
+      },
+      {
+        "id": "B",
+        "text": "La parte del daño que paga el asegurado"
+      },
+      {
+        "id": "C",
+        "text": "El descuento por no tener partes"
+      },
+      {
+        "id": "D",
+        "text": "El plazo para declarar un siniestro"
+      }
+    ],
+    "correct": "B"
+  },
+  {
+    "id": 14,
+    "round": 3,
+    "text": "En España, ¿quién paga los daños por riesgos extraordinarios como inundaciones o terremotos?",
+    "options": [
+      {
+        "id": "A",
+        "text": "El Ayuntamiento"
+      },
+      {
+        "id": "B",
+        "text": "El Consorcio de Compensación de Seguros"
+      },
+      {
+        "id": "C",
+        "text": "Nadie"
+      },
+      {
+        "id": "D",
+        "text": "La Unión Europea"
+      }
+    ],
+    "correct": "B"
+  },
+  {
+    "id": 15,
+    "round": 3,
+    "text": "¿A quién defiende un corredor de seguros como Cosnor?",
+    "options": [
+      {
+        "id": "A",
+        "text": "A la aseguradora"
+      },
+      {
+        "id": "B",
+        "text": "Al cliente"
+      },
+      {
+        "id": "C",
+        "text": "Al banco"
+      },
+      {
+        "id": "D",
+        "text": "A Hacienda"
+      }
+    ],
+    "correct": "B"
+  },
+  {
+    "id": 16,
+    "round": 3,
+    "text": "Lloyd's de Londres, el mercado de seguros más famoso, nació en...",
+    "options": [
+      {
+        "id": "A",
+        "text": "Un banco"
+      },
+      {
+        "id": "B",
+        "text": "Un puerto"
+      },
+      {
+        "id": "C",
+        "text": "Una cafetería"
+      },
+      {
+        "id": "D",
+        "text": "Un palacio"
+      }
+    ],
+    "correct": "C"
+  },
+  {
+    "id": 17,
+    "round": 3,
+    "text": "Un empleado abre un correo falso y bloquean todos los ordenadores pidiendo un rescate. ¿Cómo se llama el ataque?",
+    "options": [
+      {
+        "id": "A",
+        "text": "Spam"
+      },
+      {
+        "id": "B",
+        "text": "Ransomware"
+      },
+      {
+        "id": "C",
+        "text": "Cookie"
+      },
+      {
+        "id": "D",
+        "text": "Firewall"
+      }
+    ],
+    "correct": "B"
+  },
+  {
+    "id": 18,
+    "round": 3,
+    "text": "¿A quién protege un seguro D&O?",
+    "options": [
+      {
+        "id": "A",
+        "text": "A los dentistas"
+      },
+      {
+        "id": "B",
+        "text": "A directivos y administradores"
+      },
+      {
+        "id": "C",
+        "text": "A los dueños de perros"
+      },
+      {
+        "id": "D",
+        "text": "A los deportistas"
+      }
+    ],
+    "correct": "B"
+  },
+  {
+    "id": 19,
+    "round": 4,
+    "text": "El viento de Riazor te arranca el paraguas y golpea a otro aficionado. ¿Qué cobertura suele responder?",
+    "options": [
+      {
+        "id": "A",
+        "text": "La responsabilidad civil de tu seguro de hogar"
+      },
+      {
+        "id": "B",
+        "text": "El seguro del estadio"
+      },
+      {
+        "id": "C",
+        "text": "El seguro de viaje"
+      },
+      {
+        "id": "D",
+        "text": "Ninguna, es culpa del viento"
+      }
+    ],
+    "correct": "A"
+  },
+  {
+    "id": 20,
+    "round": 4,
+    "text": "Una empresa organiza un evento para 2.000 personas en Riazor. ¿Qué seguro es imprescindible?",
+    "options": [
+      {
+        "id": "A",
+        "text": "Seguro de mascotas"
+      },
+      {
+        "id": "B",
+        "text": "Seguro de eventos con responsabilidad civil"
+      },
+      {
+        "id": "C",
+        "text": "Seguro de decesos"
+      },
+      {
+        "id": "D",
+        "text": "Seguro de embarcación"
+      }
+    ],
+    "correct": "B"
+  },
+  {
+    "id": 21,
+    "round": 4,
+    "text": "Te llega un mensaje: «Entradas gratis para el Dépor, pulsa aquí». Es un engaño. ¿Cómo se llama?",
+    "options": [
+      {
+        "id": "A",
+        "text": "Phishing"
+      },
+      {
+        "id": "B",
+        "text": "Hat-trick"
+      },
+      {
+        "id": "C",
+        "text": "Offside"
+      },
+      {
+        "id": "D",
+        "text": "Backup"
+      }
+    ],
+    "correct": "A"
+  },
+  {
+    "id": 22,
+    "round": 4,
+    "text": "¿Cuántos años separan la fundación del Dépor (1906) y la de Cosnor (1990)?",
+    "options": [
+      {
+        "id": "A",
+        "text": "74"
+      },
+      {
+        "id": "B",
+        "text": "84"
+      },
+      {
+        "id": "C",
+        "text": "94"
+      },
+      {
+        "id": "D",
+        "text": "104"
+      }
+    ],
+    "correct": "B"
+  },
+  {
+    "id": 23,
+    "round": 4,
+    "text": "¿Qué tienen en común Cosnor y el Dépor?",
+    "options": [
+      {
+        "id": "A",
+        "text": "Los dos nacieron en 1990"
+      },
+      {
+        "id": "B",
+        "text": "Los dos son de A Coruña"
+      },
+      {
+        "id": "C",
+        "text": "Los dos visten de verde"
+      },
+      {
+        "id": "D",
+        "text": "Los dos ganaron la Champions"
+      }
+    ],
+    "correct": "B"
+  },
+  {
+    "id": 24,
+    "round": 4,
+    "text": "En la final de Copa de 2002 el Dépor ganó al Madrid en su centenario. Si existiera un «seguro contra sorpresas», ¿quién lo habría necesitado?",
+    "options": [
+      {
+        "id": "A",
+        "text": "El Dépor"
+      },
+      {
+        "id": "B",
+        "text": "El Real Madrid"
+      },
+      {
+        "id": "C",
+        "text": "El árbitro"
+      },
+      {
+        "id": "D",
+        "text": "Los aficionados del Dépor"
+      }
+    ],
+    "correct": "B"
+  }
+]
