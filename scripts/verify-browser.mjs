@@ -26,7 +26,7 @@ try {
     const credit = page.locator('.footer-credit');
     await expect(credit).toBeVisible();
     await expect(credit).toContainText('Desarrollado por el equipo de desarrollo de');
-    await expect(credit.getByRole('link')).toHaveAttribute('href', 'https://www.blancoyenbata.com');
+    await expect(credit.getByRole('link')).toHaveAttribute('href', 'https://www.blancoyenbatea.com');
   }
   await page.setViewportSize({ width: 390, height: 844 });
   await page.screenshot({ path: '.qa/home-mobile.png', fullPage: true });
