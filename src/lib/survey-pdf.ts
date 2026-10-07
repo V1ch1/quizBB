@@ -106,13 +106,13 @@ export async function globalSurveyPdf(summary: Summary, generatedAt = new Date()
   if (!summary.total) { r.gap(); r.text('Todavía no hay respuestas. No se calculan medias hasta recibir la primera encuesta.', 11, true); }
   for (const [d, name] of DEPARTMENTS.entries()) {
     r.newPage(name);
-    r.text(`Media: ${score(summary.departments[d])} · ${summary.total} respuestas por pregunta`, 10); r.gap();
-    r.text('Tabla: puntuación (fila superior) / número de respuestas (fila inferior)', 8); r.gap();
+    r.text(`Media: ${score(summary.departments[d])} · ${summary.total} ${summary.total === 1 ? 'respuesta' : 'respuestas'} por pregunta`, 10); r.gap(6);
+    r.text('Tabla: puntuación (fila superior) / número de respuestas (fila inferior)', 8); r.gap(6);
     for (const [q, question] of SURVEY_QUESTIONS.entries()) {
-      r.ensure(88);
+      r.ensure(75);
       r.text(`${q + 1}. ${question}`, 10, true);
       r.text(`Media: ${score(summary.questions[d][q].average)}`, 9);
-      r.distribution(summary.questions[d][q].distribution); r.gap(2);
+      r.distribution(summary.questions[d][q].distribution); r.gap(12);
     }
   }
   return r.save();
