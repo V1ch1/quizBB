@@ -16,6 +16,7 @@ export default async function Page({ searchParams }: { searchParams: Promise<{ p
   return <>
     <div className="survey-admin-heading"><div><span className="survey-kicker">PANEL PRIVADO · SOLO CONSULTA</span><h1>Resultados de la encuesta</h1></div><form action={logoutSurvey}><button className="survey-secondary">Cerrar sesión</button></form></div>
     <p>{summary.total} {summary.total === 1 ? 'encuesta recibida' : 'encuestas recibidas'} · <Link href="/encuesta/resultados" prefetch={false}>Actualizar resultados</Link></p>
+    <p><a className="survey-secondary survey-pdf-link" href="/encuesta/resultados/pdf">Exportar estadísticas a PDF</a></p>
     <p className="survey-note">Cada encuesta es anónima. No se recoge la identidad de quien responde. Las medias incluyen todas las valoraciones, también los ceros.</p>
     <div className="survey-stat-grid">{DEPARTMENTS.map((name, d) => <section className="survey-card" key={name}><h2>{name}</h2><strong className="survey-big-score">{score(summary.departments[d])}<small> / 10</small></strong><p>Media de las seis preguntas</p></section>)}</div>
     {!summary.total && <p className="survey-card">Todavía no hay encuestas enviadas. Los resultados aparecerán aquí cuando lleguen las primeras respuestas.</p>}

@@ -84,3 +84,10 @@ La sesión usa iron-session y cookie HttpOnly, SameSite=Lax, Secure en Vercel, c
 
 Las tablas nuevas están declaradas en `src/lib/survey-store.ts` y se crean de forma aditiva, sin modificar las partidas. Antes de publicar, validar estas consultas en una rama de Neon del proyecto `square-term-61149537`. Validado sobre SQLite local, navegador móvil y PostgreSQL en la rama de pruebas br-sweet-frost-za67v3f4: esquema aditivo, envíos concurrentes sin duplicados, agregados y detalle individual. La fila de prueba se eliminó al terminar. Los secretos del panel se han configurado únicamente en producción en Vercel.
 
+
+### Exportación privada a PDF
+
+El panel permite descargar las estadísticas globales y cada cuestionario individual con la misma cuenta cosnor. Las rutas /encuesta/resultados/pdf y /encuesta/resultados/[id]/pdf comprueban la sesión antes de consultar datos; devuelven adjuntos PDF con Cache-Control privado y no-store. Los informes incluyen la convención, fecha de generación en Europe/Madrid, paginación, todas las valoraciones y comentarios completos, o medias y distribuciones de todas las encuestas. Los símbolos que la fuente no representa se conservan mediante su código Unicode. Fuentes Noto Sans incluidas con licencia OFL; generación en servidor, sin servicios externos ni cambios de esquema.
+
+Verificación: tests/survey-pdf.test.ts cubre informe vacío, 4.000 respuestas simuladas y comentarios extensos. scripts/verify-survey-pdf.mjs comprueba las descargas reales, autorización, 404 y cierre de sesión en puerto 3002 con la base aislada .qa/pdf-browser.sqlite.
+
