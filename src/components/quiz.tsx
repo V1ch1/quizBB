@@ -118,6 +118,7 @@ export default function Quiz() {
                 <h1>Aquí se juega<br/>con <span className="history-word">historia<svg viewBox="0 0 420 22" preserveAspectRatio="none" aria-hidden="true"><path d="M4 14C105 1 270 3 412 12M60 20C172 9 290 10 373 15"/></svg></span><span className="plum-dot">.</span></h1>
                 <p className="hero-description">Lo que nos une, lo que nos protege y lo que nos hace vibrar. ¿Cuánto sabes de Cosnor y del Dépor?</p>
                 <div className="hero-facts"><span><CircleHelp size={17}/><b>24</b> preguntas</span><i/><span><Flag size={17}/><b>4</b> rondas</span><i/><span><b>15 s</b> por pregunta</span></div>
+                <p className="prize-notice"><Trophy size={20} aria-hidden="true"/><span>¡Al ganador le espera un premio!</span></p>
                 <button className="button primary hero-cta" disabled={!ready} onClick={() => go(game ? 'game' : 'alias')}>{!ready ? <><LoaderCircle className="spin" size={18}/>Preparando el reto</> : <>{game ? game.stage === 'result' ? 'Ver mi resultado' : 'Continuar mi partida' : 'Acepto el reto'}<ArrowRight size={21}/></>}</button>
                 {sessionError && <div className="error-message" role="alert">{sessionError}<button onClick={() => void loadSession()} className="text-button">Reintentar</button></div>}
                 <p className="cta-caption"><ShieldCheck size={14}/>Solo necesitas un alias y ganas de jugar.</p>
