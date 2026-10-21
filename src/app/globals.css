@@ -118,6 +118,8 @@ button, a { touch-action: manipulation; }
   .join-qr a { max-width: 100%; overflow-wrap: anywhere; font-size: 16px; font-weight: 700; color: var(--plum); }
   .join-qr p { font-size: 14px; line-height: 1.5; color: var(--muted); }
   .with-join-qr .hero { grid-template-columns: 1fr; }
+  .home-main.with-join-qr .hero { align-items: start; }
+  .home-main.with-join-qr .join-qr { margin-top: 61px; }
   .with-join-qr .hero-art { display: none; }
   .display-mode { max-width: none; }
   .display-mode .with-join-qr { grid-template-columns: minmax(0, 1fr) clamp(300px, 26vw, 560px); gap: 5vw; }
