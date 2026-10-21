@@ -43,7 +43,7 @@ Para verificar el cronómetro: `node scripts/verify-timer.mjs <endpoint>`. Compr
 - Las pantallas de introducción de ronda y de corrección no consumen tiempo de la siguiente pregunta. Las partidas antiguas sin plazo reciben uno al recuperarse; los resultados ya completados se conservan.
 - Las cuatro rondas y las preguntas mantienen su orden. Las opciones se barajan por partida y reciben identificadores aleatorios.
 - Se confirma cada respuesta; no se puede cambiar después. Las peticiones repetidas no duplican puntuación. Actualizaciones concurrentes utilizan control de revisión en la base de datos.
-- La clasificación muestra hasta 50 resultados, además de la posición propia si queda fuera. Iguales puntos comparten puesto. Se actualiza cada 15 segundos mientras está visible.
+- La clasificación muestra hasta 50 resultados, además de la posición propia si queda fuera. Iguales puntos comparten puesto. Se actualiza automáticamente cada 3 segundos mientras está visible, y también al volver a la pestaña o recuperar la conexión. Si falla la conexión conserva los últimos resultados y reintenta sin intervención.
 - Una cookie HttpOnly aleatoria recupera la misma partida durante 30 días. Una partida por navegador; NO equivale a una persona verificada. Borrar cookies u otro navegador permite otra participación. Si hay premios, añadir códigos individuales o identificación antes del lanzamiento.
 - Cada alias es un nombre visible, no una clave única. Dos personas pueden usar el mismo alias sin compartir sesión.
 - El alias se muestra públicamente. No se solicita email ni teléfono. Los intentos quedan en la base hasta que el organizador los elimine; antes del lanzamiento se debe definir la duración de la campaña y su conservación.
@@ -91,3 +91,11 @@ El panel permite descargar las estadísticas globales y cada cuestionario indivi
 
 Verificación: tests/survey-pdf.test.ts cubre informe vacío, 4.000 respuestas simuladas y comentarios extensos. scripts/verify-survey-pdf.mjs comprueba las descargas reales, autorización, 404 y cierre de sesión en puerto 3002 con la base aislada .qa/pdf-browser.sqlite.
 
+
+## QR y pantalla gigante
+
+La home y la clasificación muestran un QR lateral a partir de 1100 px. En móvil se oculta. Se genera en SVG dentro de la aplicación, sin servicios externos, con margen blanco de cuatro módulos.
+
+El botón «Pantalla gigante» abre `/?pantalla=1`; para abrir directamente el marcador, usar `/?pantalla=1&vista=clasificacion`. Este modo amplía textos y QR, conserva la vista al recargar y no recupera ni inicia partidas. Para ocupar toda la pantalla, usar F11 en el navegador.
+
+El QR apunta siempre al inicio: utiliza el origen de `NEXT_PUBLIC_APP_URL` o, si no está configurada, el de la página abierta; elimina rutas, parámetros y fragmentos. Configurar la URL pública definitiva antes de compilar (las variables NEXT_PUBLIC se integran en la compilación). En localhost no se genera QR salvo que se haya configurado una dirección válida. En una IP de red local, los móviles deben compartir una red que permita acceder al servidor.

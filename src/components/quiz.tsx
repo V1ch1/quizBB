@@ -7,6 +7,7 @@ import { ArrowRight, ArrowLeft, Trophy, ArrowUpRight, X, Check, ShieldCheck, Fla
 import { nextStep, startGame, submitAnswer, expireQuestion } from '@/app/actions';
 import { BRAND, ROUNDS, EVENT } from '@/lib/config';
 import { useQuestionClock } from './use-question-clock';
+import JoinQR from './join-qr';
 import type { ActionResult, GameView, Ranking } from '@/lib/types';
 
 type Screen = 'home' | 'alias' | 'game' | 'ranking';
@@ -20,6 +21,7 @@ function RoundIcon({ round, size = 24 }: { round: number; size?: number }) {
 
 export default function Quiz() {
   const [screen, setScreen] = useState<Screen>('home');
+  const [displayMode, setDisplayMode] = useState(false);
   const [game, setGame] = useState<GameView | null>(null);
   const [ready, setReady] = useState(false);
   const [sessionError, setSessionError] = useState('');
@@ -31,12 +33,20 @@ export default function Quiz() {
   const [ranking, setRanking] = useState<Ranking | null>(null);
   const [rankingError, setRankingError] = useState('');
   const [rankingLoading, setRankingLoading] = useState(false);
+  const rankingRequest = useRef(false);
   const rules = useRef<HTMLDialogElement>(null);
   const focusHeading = useCallback((node: HTMLHeadingElement | null) => {
     node?.focus({ preventScroll: true });
   }, []);
 
   const loadSession = useCallback(async () => {
+    const params = new URLSearchParams(window.location.search);
+    if (params.get('pantalla') === '1') {
+      setDisplayMode(true);
+      setScreen(params.get('vista') === 'clasificacion' ? 'ranking' : 'home');
+      setReady(true);
+      return;
+    }
     setSessionError('');
     try {
       const response = await fetch('/api/session', { cache: 'no-store' });
@@ -50,19 +60,28 @@ export default function Quiz() {
   useEffect(() => { void loadSession(); }, [loadSession]);
 
   const loadRanking = useCallback(async () => {
+    if (rankingRequest.current) return;
+    rankingRequest.current = true;
     setRankingLoading(true);
     try {
-      const response = await fetch('/api/leaderboard', { cache: 'no-store' });
+      const response = await fetch('/api/leaderboard', { cache: 'no-store', signal: AbortSignal.timeout(10000) });
       if (!response.ok) throw new Error();
       setRanking(await response.json()); setRankingError('');
     } catch { setRankingError('No se ha podido actualizar la clasificación.'); }
-    finally { setRankingLoading(false); }
+    finally { rankingRequest.current = false; setRankingLoading(false); }
   }, []);
   useEffect(() => {
     if (screen !== 'ranking' && !(screen === 'game' && game?.stage === 'result')) return;
     void loadRanking();
-    const interval = setInterval(() => { if (!document.hidden) void loadRanking(); }, 15000);
-    return () => clearInterval(interval);
+    const refresh = () => { if (!document.hidden) void loadRanking(); };
+    const interval = setInterval(refresh, 3000);
+    document.addEventListener('visibilitychange', refresh);
+    window.addEventListener('online', refresh);
+    return () => {
+      clearInterval(interval);
+      document.removeEventListener('visibilitychange', refresh);
+      window.removeEventListener('online', refresh);
+    };
   }, [screen, game?.stage, loadRanking]);
 
   useEffect(() => {
@@ -86,12 +105,21 @@ export default function Quiz() {
   }, [game, run]);
   const remaining = useQuestionClock(game, onExpire);
   const timeExpired = game?.stage === 'question' && remaining === 0;
-  function go(screen: Screen) { if (!busy) setScreen(screen); }
+  function go(screen: Screen) {
+    if (busy) return;
+    if (displayMode) {
+      if (screen !== 'home' && screen !== 'ranking') return;
+      const url = new URL(window.location.href);
+      url.searchParams.set('vista', screen === 'ranking' ? 'clasificacion' : 'inicio');
+      window.history.replaceState(null, '', url);
+    }
+    setScreen(screen);
+  }
   const activeRound = ROUNDS[(game?.round ?? 1) - 1];
   const inGame = screen === 'game' && game && game.stage !== 'result';
 
   return <MotionConfig reducedMotion="user">
-    <div className="app-shell">
+    <div className={`app-shell${displayMode ? ' display-mode' : ''}`}>
       <a className="skip-link" href="#main">Saltar al contenido</a>
       <header className={`header${inGame ? ' playing' : ''}`}>
         <button className="brand" aria-label="Cosnor, ir al inicio" onClick={() => go('home')} disabled={busy}>
@@ -99,6 +127,7 @@ export default function Quiz() {
         </button>
         <span className="header-divider"/><span className="header-title">EL RETO</span>
         <nav aria-label="Navegación principal">
+          {(screen === 'home' || screen === 'ranking') && <a className="display-toggle nav-link" href={displayMode ? '/' : `/?pantalla=1&vista=${screen === 'ranking' ? 'clasificacion' : 'inicio'}`}>{displayMode ? 'Salir de pantalla gigante' : 'Pantalla gigante'}</a>}
           {inGame && <span className="header-score"><Sparkles size={15}/>{format(game.score)} <small>pts</small></span>}
           <button className={`nav-link ${screen === 'ranking' ? 'active' : ''}`} onClick={() => go('ranking')} disabled={busy}><Trophy size={17}/><span>Clasificación</span><ArrowUpRight size={14}/></button>
           <button className="help-button" onClick={() => rules.current?.showModal()} aria-label="Cómo se juega"><CircleHelp size={21}/></button>
@@ -109,7 +138,8 @@ export default function Quiz() {
         <span><time dateTime={EVENT.dateTime}>{EVENT.date}</time><span className="event-separator" aria-hidden="true">·</span>{EVENT.venue}</span>
       </section>
 
-      <main id="main" className={screen === 'home' ? 'home-main' : 'play-main'}>
+      <main id="main" className={`${screen === 'home' ? 'home-main' : 'play-main'}${screen === 'home' || screen === 'ranking' ? ' with-join-qr' : ''}`}>
+        <div className="screen-content">
         <AnimatePresence mode="wait" initial={false}>
           {screen === 'home' && <motion.div key="home" initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -8 }} transition={{ duration: .22 }}>
             <section className="hero">
@@ -176,10 +206,12 @@ export default function Quiz() {
 
           {screen === 'game' && game?.stage === 'result' && <motion.section key="result" className="result-layout" initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }}><div className="result-card"><div className="result-trophy"><Trophy size={51}/><span className="trophy-spark one">✳</span><span className="trophy-spark two">✧</span></div><p className="eyebrow">RETO COMPLETADO</p><h1 ref={focusHeading} tabIndex={-1}>{game.correctCount >= 18 ? '¡Tienes mucha historia!' : game.correctCount >= 10 ? '¡Bien jugado!' : '¡Gracias por darlo todo!'}</h1><p>{game.alias}, ya formas parte de este reto.</p><div className="final-score"><motion.strong initial={{ scale: .85 }} animate={{ scale: 1 }} transition={{ type: 'spring' }}>{format(game.score)}</motion.strong><span>PUNTOS DE 2.400</span></div><div className="result-metrics"><span><CheckCircle2 size={20}/><b>{game.correctCount} / {game.total}</b><small>Aciertos</small></span><span><Medal size={20}/><b>{ranking?.own ? `#${ranking.own.rank}` : '—'}</b><small>Tu posición</small></span></div><button className="button primary full-width" onClick={() => go('ranking')}>Ver la clasificación<Trophy size={19}/></button><p className="small-note">Tu resultado ya está guardado. ¡Gracias por jugar!</p></div><div className="result-side"><span className="eyebrow">LA HISTORIA LA HACEMOS JUNTOS</span><h2>La mejor parte <br/>es compartir <br/><span>equipo.</span></h2><p>Cosnor, el Dépor y tú.<br/>Una pasión que nos une más allá del juego.</p><div className="result-pitch"><Ball size={72}/><span>COSNOR × DÉPOR</span></div><button className="text-button" onClick={() => go('home')}>Volver al inicio<ArrowUpRight size={17}/></button>{rankingError && <p className="error-message" role="alert">{rankingError}<button className="text-button" onClick={() => void loadRanking()}>Reintentar</button></p>}</div></motion.section>}
 
-          {screen === 'ranking' && <motion.section key="ranking" className="ranking-layout" initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }}><button className="back-link" onClick={() => go(game ? 'game' : 'home')}><ArrowLeft size={16}/>{game ? 'Volver a mi partida' : 'Volver al inicio'}</button><div className="ranking-heading"><div><span className="eyebrow">EL MARCADOR DE LOS NUESTROS</span><h1 ref={focusHeading} tabIndex={-1}>Aquí está el equipo.</h1><p>Cada acierto cuenta. ¿Dónde está tu nombre?</p></div><span className="ranking-trophy"><Trophy size={39}/></span></div><div className="ranking-bar"><span><Users size={17}/>{ranking ? `${ranking.total} ${ranking.total === 1 ? 'participante' : 'participantes'}` : 'Cargando participantes…'}</span><button className="text-button" onClick={() => void loadRanking()} disabled={rankingLoading}><RotateCw size={15} className={rankingLoading ? 'spin' : ''}/>Actualizar</button></div>{rankingError && <p className="error-message" role="alert">{rankingError}<button className="text-button" onClick={() => void loadRanking()}>Reintentar</button></p>}
+          {screen === 'ranking' && <motion.section key="ranking" className="ranking-layout" initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }}><button className="back-link" onClick={() => go(game ? 'game' : 'home')}><ArrowLeft size={16}/>{game ? 'Volver a mi partida' : 'Volver al inicio'}</button><div className="ranking-heading"><div><span className="eyebrow">EL MARCADOR DE LOS NUESTROS</span><h1 ref={focusHeading} tabIndex={-1}>Aquí está el equipo.</h1><p>Actualización automática cada 3 segundos.</p></div><span className="ranking-trophy"><Trophy size={39}/></span></div><div className="ranking-bar"><span><Users size={17}/>{ranking ? `${ranking.total} ${ranking.total === 1 ? 'participante' : 'participantes'}` : 'Cargando participantes…'}</span><button className="text-button" onClick={() => void loadRanking()} disabled={rankingLoading}><RotateCw size={15} className={rankingLoading ? 'spin' : ''}/>Actualizar</button></div>{rankingError && <p className="error-message" role="alert">{rankingError}<button className="text-button" onClick={() => void loadRanking()}>Reintentar</button></p>}
             {!ranking && !rankingError ? <div className="empty-ranking" role="status"><LoaderCircle className="spin" size={30}/><p>Preparando el marcador…</p></div> : ranking?.entries.length === 0 ? <div className="empty-ranking"><Flag size={43}/><h2>El primer puesto está esperando.</h2><p>Completa las cuatro rondas y estrena la clasificación.</p><button className="button primary" disabled={!ready} onClick={() => go(game ? 'game' : 'alias')}>{game ? 'Continuar mi partida' : 'Acepto el reto'}<ArrowRight size={19}/></button></div> : ranking && <><div className="ranking-table-wrap"><table className="ranking-table"><caption className="sr-only">Clasificación general del reto Cosnor</caption><thead><tr><th scope="col">POSICIÓN</th><th scope="col">PARTICIPANTE</th><th scope="col">PUNTOS</th></tr></thead><tbody>{ranking.entries.map(entry => <tr key={entry.publicId} className={entry.publicId === game?.publicId ? 'own-row' : ''}><td><span className={`rank-number rank-${entry.rank}`}>{entry.rank <= 3 ? <Medal size={17}/> : null}{entry.rank}</span></td><td><span className="avatar">{entry.alias.slice(0, 1).toUpperCase()}</span><strong>{entry.alias}</strong>{entry.publicId === game?.publicId && <span className="you-tag">TÚ</span>}</td><td>{format(entry.score)} <small>pts</small></td></tr>)}</tbody></table></div>{ranking.own && !ranking.entries.some(e => e.publicId === ranking.own!.publicId) && <div className="own-summary"><span>#{ranking.own.rank} · {ranking.own.alias} <b>TÚ</b></span><strong>{format(ranking.own.score)} pts</strong></div>}<div className="ranking-footnote"><span><ShieldCheck size={15}/>Resultados guardados al completar el reto.</span><span>Iguales puntos, misma posición.</span></div></>}
           </motion.section>}
         </AnimatePresence>
+        </div>
+        {(screen === 'home' || screen === 'ranking') && <JoinQR />}
       </main>
 
       <footer className="footer">

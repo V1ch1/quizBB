@@ -104,3 +104,39 @@ button, a { touch-action: manipulation; }
 
 .prize-notice { display: flex; align-items: center; gap: 10px; width: fit-content; max-width: 100%; margin: 22px 0 0; padding: 12px 15px; border-radius: 10px; background: #edf5d8; color: var(--plum); font-size: 15px; font-weight: 700; line-height: 1.5; }
 .prize-notice svg { flex-shrink: 0; }
+
+/* A reserved column keeps the code visible without covering content. */
+.join-qr { display: none; }
+.display-toggle { text-decoration: none; }
+.screen-content { min-width: 0; }
+@media (min-width: 1100px) {
+  .with-join-qr { display: grid; grid-template-columns: minmax(0, 1fr) 260px; gap: 32px; align-items: start; }
+  .join-qr { display: flex; flex-direction: column; align-items: center; position: sticky; top: 24px; margin: 40px 0; padding: 24px 16px; border: 1px solid var(--line); border-radius: 16px; background: white; text-align: center; gap: 16px; }
+  .join-qr h2 { font-size: 25px; line-height: 1.15; color: var(--plum); }
+  .join-qr .eyebrow { font-size: 9px; }
+  .join-qr svg { width: 100%; height: auto; flex-shrink: 0; }
+  .join-qr a { max-width: 100%; overflow-wrap: anywhere; font-size: 16px; font-weight: 700; color: var(--plum); }
+  .join-qr p { font-size: 14px; line-height: 1.5; color: var(--muted); }
+  .with-join-qr .hero { grid-template-columns: 1fr; }
+  .with-join-qr .hero-art { display: none; }
+  .display-mode { max-width: none; }
+  .display-mode .with-join-qr { grid-template-columns: minmax(0, 1fr) clamp(300px, 26vw, 560px); gap: 5vw; }
+  .display-mode .join-qr h2 { font-size: clamp(28px, 2.2vw, 48px); }
+  .display-mode .join-qr p, .display-mode .join-qr a { font-size: clamp(18px, 1.3vw, 28px); }
+  .display-mode .hero h1 { font-size: clamp(70px, 6vw, 150px); }
+  .display-mode .hero-description { font-size: clamp(22px, 1.6vw, 36px); max-width: 38em; }
+  .display-mode .ranking-layout { max-width: none; }
+  .display-mode .ranking-heading h1 { font-size: clamp(40px, 3vw, 72px); }
+  .display-mode .ranking-table td { font-size: clamp(22px, 1.7vw, 40px); }
+  .display-mode .ranking-table th { font-size: clamp(14px, 1vw, 24px); }
+  .display-mode .rank-number { font-size: inherit; }
+}
+.display-mode .hero-cta, .display-mode .cta-caption, .display-mode .empty-ranking .button { display: none; }
+@media (max-width: 1099px) { .display-toggle { display: none; } }
+@media (min-width: 1900px) {
+  .app-shell:not(.display-mode) { max-width: 1900px; }
+  .with-join-qr .hero { grid-template-columns: 1.12fr 1fr; }
+  .with-join-qr .hero-art { display: block; }
+  .display-mode .hero { grid-template-columns: 1fr; }
+  .display-mode .hero-art { display: none; }
+}
